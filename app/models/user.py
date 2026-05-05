@@ -8,5 +8,4 @@ class User(Base):
     name = Column(String, nullable = False)
     email = Column(String, unique = True, index = True)
     department_id = Column(Integer,  ForeignKey("departments.id"))
-
     department = relationship("Department")   
