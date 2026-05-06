@@ -12,7 +12,7 @@ class UserResponse(BaseModel):
     email: str
     department: DepartmentResponse
 
-    class config:
+    class Config:
         from_attributes = True
 
 UserResponse.model_rebuild()
