@@ -14,7 +14,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already exists")
 
-    new_user = User(**user.dict())
+    new_user = User(**user.model_dump())
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -35,3 +35,4 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code = 404, detail = "User not found")
     return user
+    

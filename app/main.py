@@ -1,15 +1,15 @@
 from fastapi import FastAPI
 from app.database import engine, Base, SessionLocal
 
-from app.models import user, department
-from app.routes import user, department
+from app.models import user, department, address
+from app.routes import user, department, address
 
 from app.utils.seed import seed_departments
  
 
 app = FastAPI()
 
-Base.metadata.create_all(bind = engine)
+# Base.metadata.create_all(bind = engine)
 
 @app.on_event("startup")
 def startup_event():
@@ -25,3 +25,4 @@ def root():
 
 app.include_router(user.router)
 app.include_router(department.router)
+app.include_router(address.router)
