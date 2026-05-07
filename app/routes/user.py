@@ -35,4 +35,32 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code = 404, detail = "User not found")
     return user
+
+#update user
+@router.put("/{user_id}", response_model = UserResponse)
+def update_user(user_id: int, user_update: UserCreate, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code = 404, detail = "User not found")
+    
+    user.first_name = user_update.first_name
+    user.last_name = user_update.last_name
+    user.email = user_update.email
+    user.phone = user_update.phone
+    user.department_id = user_update.department_id
+    db.commit()
+    db.refresh(user)
+    return user
+
+#delete user
+@router.delete("/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code = 404, detail = "User not found")
+    
+    db.delete(user)
+    db.commit()
+    return {"detail": "User deleted successfully"}
+    
     

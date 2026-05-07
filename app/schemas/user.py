@@ -1,13 +1,13 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from app.schemas.department import DepartmentResponse
 from app.schemas.address import AddressResponse
 
 class UserCreate(BaseModel):
     # name: str
-    first_name: str
-    last_name: str
-    email: str
-    phone: str
+    first_name: str = Field(..., min_length=3, max_length=25)
+    last_name: str = Field(..., min_length=3, max_length=25)
+    email: EmailStr
+    phone: str = Field(..., min_length=10, max_length=15)
     department_id: int
 
 class UserResponse(BaseModel):
