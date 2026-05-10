@@ -8,6 +8,7 @@ class UserCreate(BaseModel):
     last_name: str = Field(..., min_length=3, max_length=25)
     email: EmailStr
     phone: str = Field(..., min_length=10, max_length=15)
+    password: str = Field(..., min_length=8)
     department_id: int
 
 class UserResponse(BaseModel):
