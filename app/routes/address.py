@@ -4,12 +4,17 @@ from app.database import get_db
 from app.models.address import Address
 from app.schemas.address import AddressCreate, AddressResponse
 from app.models.user import User
+from fastapi.security import OAuth2PasswordBearer
+from app.auth.jwt_handler import decode_access_token
 
 router = APIRouter(prefix = "/addresses", tags = ["Addresses"])
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 #create address for a user
 @router.post("/users/{user_id}", response_model = AddressResponse)
-def create_address_for_user(user_id: int, address: AddressCreate, db: Session = Depends(get_db)):
+def create_address_for_user(user_id: int, address: AddressCreate, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code = 404, detail = "User not found")
@@ -22,7 +27,8 @@ def create_address_for_user(user_id: int, address: AddressCreate, db: Session = 
 
 #get all addresses for a user
 @router.get("/users/{user_id}", response_model = list[AddressResponse])
-def get_addresses_for_user(user_id: int, db: Session = Depends(get_db)):
+def get_addresses_for_user(user_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code = 404, detail = "User not found")
@@ -33,7 +39,8 @@ def get_addresses_for_user(user_id: int, db: Session = Depends(get_db)):
 
 #get address by id
 @router.get("/{address_id}", response_model = AddressResponse)
-def get_address(address_id: int, db: Session = Depends(get_db)):
+def get_address(address_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     address = db.query(Address).filter(Address.id == address_id).first()
     if not address:
         raise HTTPException(status_code = 404, detail = "Address not found")
@@ -41,7 +48,8 @@ def get_address(address_id: int, db: Session = Depends(get_db)):
 
 #update address
 @router.put("/{address_id}", response_model = AddressResponse)
-def update_address(address_id: int, address_update: AddressCreate, db: Session = Depends(get_db)):
+def update_address(address_id: int, address_update: AddressCreate, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     address = db.query(Address).filter(Address.id == address_id).first()
     if not address:
         raise HTTPException(status_code = 404, detail = "Address not found")
@@ -56,7 +64,8 @@ def update_address(address_id: int, address_update: AddressCreate, db: Session =
 
 #delete address
 @router.delete("/{address_id}")
-def delete_address(address_id: int, db: Session = Depends(get_db)):
+def delete_address(address_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     address = db.query(Address).filter(Address.id == address_id).first()
     if not address:
         raise HTTPException(status_code = 404, detail = "Address not found")

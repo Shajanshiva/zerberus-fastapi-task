@@ -6,7 +6,7 @@ from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import UserLogin
 from app.auth.auth import verify_password
-from app.auth.jwt_handler import create_access_token
+from app.auth.jwt_handler import create_access_token, decode_access_token
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -27,7 +27,9 @@ def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session =
     # PROTECTED ROUTE
 @router.get("/me")
 def get_me(token: str = Depends(oauth2_scheme)):
+    payload = decode_access_token(token)
     return {
         "message": "Token verified successfully",
-        "token": token
+        "token": token,
+        "payload": payload
     }

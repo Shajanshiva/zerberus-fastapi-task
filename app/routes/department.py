@@ -3,12 +3,17 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.department import Department
 from app.schemas.department import DepartmentCreate, DepartmentResponse
+from fastapi.security import OAuth2PasswordBearer
+from app.auth.jwt_handler import decode_access_token
 
 router = APIRouter(prefix = "/departments", tags = ["Departments"])
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 #create department
 @router.post("/", response_model = DepartmentResponse)
-def create_department(dept: DepartmentCreate, db: Session = Depends(get_db)):
+def create_department(dept: DepartmentCreate, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     existing_dept = db.query(Department).filter(Department.name == dept.name).first()
     if existing_dept:
         raise HTTPException(status_code=400, detail="Department already exists")
@@ -21,13 +26,15 @@ def create_department(dept: DepartmentCreate, db: Session = Depends(get_db)):
 
 #get all departments
 @router.get("/", response_model = list[DepartmentResponse])
-def get_departments(db: Session = Depends(get_db)):
+def get_departments(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     departments = db.query(Department).all()
     return departments
 
 #get department by id
 @router.get("/{dept_id}", response_model = DepartmentResponse)
-def get_department(dept_id: int, db: Session = Depends(get_db)):
+def get_department(dept_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     dept = db.query(Department).filter(Department.id == dept_id).first()
     if not dept:
         raise HTTPException(status_code=404, detail="Department not found")
@@ -35,7 +42,8 @@ def get_department(dept_id: int, db: Session = Depends(get_db)):
 
 #update department
 @router.put("/{dept_id}", response_model = DepartmentResponse)
-def update_department(dept_id: int, dept_update: DepartmentCreate, db: Session = Depends(get_db)):
+def update_department(dept_id: int, dept_update: DepartmentCreate, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     dept = db.query(Department).filter(Department.id == dept_id).first()
     if not dept:
         raise HTTPException(status_code=404, detail="Department not found")
@@ -47,7 +55,8 @@ def update_department(dept_id: int, dept_update: DepartmentCreate, db: Session =
 
 #delete department
 @router.delete("/{dept_id}")
-def delete_department(dept_id: int, db: Session = Depends(get_db)):
+def delete_department(dept_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    decode_access_token(token)
     dept = db.query(Department).filter(Department.id == dept_id).first()
     if not dept:
         raise HTTPException(status_code=404, detail="Department not found")
