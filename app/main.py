@@ -5,6 +5,8 @@ from app.models import user, department, address
 from app.routes import user, department, address, auth
 
 from app.utils.seed import seed_departments
+
+from app.scheduler import scheduler
  
 
 app = FastAPI()
