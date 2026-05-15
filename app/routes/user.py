@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordBearer
 from app.auth.jwt_handler import decode_access_token
 from app.redis_client import redis_client
 import json
+from fastapi import Query
 
 router = APIRouter(prefix = "/users", tags = ["Users"])
 
@@ -39,14 +40,17 @@ def create_user(user: UserCreate, db: Session = Depends(get_db), token: str = De
 
 #get all users
 @router.get("/", response_model = list[UserResponse])
-def get_users(db:Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+def get_users(cache:str = Query(default="hot"), db:Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     decode_access_token(token)
 
-    cached_users = redis_client.get("users")
-    if cached_users:
-        print("Fetching users from Redis cache")
-        return json.loads(cached_users)
+    # If cache is hot, try to fetch from Redis
+    if cache == "hot":
+        cached_users = redis_client.get("users")
+        if cached_users:
+            print("Fetching users from Redis cache")
+            return json.loads(cached_users)
 
+    # If cache is cold or not found in Redis, fetch from database
     print("Fetching users from database")
 
     users = db.query(User).all()
